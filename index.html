@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>☁️雲灯台事務所 v0</title>
+  <style>
+    :root {
+      --bg-night: #1f2432;
+      --bg-wall: #5b4a42;
+      --wall-texture: #6a564d;
+      --wood-dark: #4a3329;
+      --wood-mid: #6b4a39;
+      --brass: #b98b44;
+      --lamp-glow: rgba(255, 211, 133, 0.35);
+      --cloud: #ddd8d2;
+      --cloud-shadow: #cfc7be;
+      --window-frame: #6c4e3d;
+      --paper: #e8dcc8;
+      --text: #2c211d;
+      --gura: #c8e0e8;
+      --gura-line: #7e98a5;
+      --plant: #9fb463;
+      --plant-dark: #71844c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at top, #3a4158 0%, #232838 38%, #171b28 100%);
+      font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+      color: #f7f1ea;
+      padding: 24px;
+    }
+
+    .wrap {
+      width: min(100%, 980px);
+    }
+
+    .title {
+      margin: 0 0 14px;
+      font-size: clamp(24px, 4vw, 34px);
+      letter-spacing: 0.04em;
+    }
+
+    .subtitle {
+      margin: 0 0 18px;
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+    }
+
+    .office {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 62% 42%, rgba(255, 219, 150, 0.18) 0%, rgba(255, 219, 150, 0) 34%),
+        linear-gradient(180deg, var(--wall-texture) 0%, var(--bg-wall) 100%);
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.35),
+        inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    /* subtle wall texture */
+    .office::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(255,255,255,0.06), transparent 18%),
+        radial-gradient(circle at 80% 45%, rgba(255,255,255,0.05), transparent 17%),
+        radial-gradient(circle at 45% 75%, rgba(0,0,0,0.08), transparent 22%),
+        radial-gradient(circle at 60% 28%, rgba(0,0,0,0.06), transparent 16%);
+      opacity: .55;
+      pointer-events: none;
+    }
+
+    .ceiling-lamp {
+      position: absolute;
+      width: 160px;
+      height: 150px;
+      left: 50%;
+      top: -8px;
+      transform: translateX(-50%);
+      z-index: 4;
+    }
+
+    .ceiling-lamp .cord {
+      position: absolute;
+      width: 4px;
+      height: 52px;
+      background: #201814;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 0;
+      border-radius: 999px;
+    }
+
+    .ceiling-lamp .shade {
+      position: absolute;
+      left: 50%;
+      top: 44px;
+      transform: translateX(-50%);
+      width: 112px;
+      height: 46px;
+      background: linear-gradient(180deg, #6b4d2e 0%, #3c281d 100%);
+      border-radius: 56px 56px 26px 26px;
+      box-shadow: inset 0 -3px 0 rgba(255,255,255,0.1);
+    }
+
+    .ceiling-lamp .bulb {
+      position: absolute;
+      left: 50%;
+      top: 72px;
+      transform: translateX(-50%);
+      width: 26px;
+      height: 26px;
+      background: #ffd690;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(255, 217, 143, 0.9);
+    }
+
+    .ceiling-lamp .glow {
+      position: absolute;
+      left: 50%;
+      top: 70px;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 220px;
+      background: radial-gradient(circle at center top, rgba(255,220,150,.34), rgba(255,220,150,0) 70%);
+      pointer-events: none;
+    }
+
+    .bookshelf {
+      position: absolute;
+      left: 4.5%;
+      bottom: 22%;
+      width: 19%;
+      height: 48%;
+      background: linear-gradient(180deg, #4f362a 0%, #3d281f 100%);
+      border-radius: 10px 10px 8px 8px;
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,.12);
+      z-index: 3;
+    }
+
+    .bookshelf::before,
+    .bookshelf::after {
+      content: "";
+      position: absolute;
+      left: 7%;
+      right: 7%;
+      height: 8px;
+      background: rgba(36, 23, 18, .9);
+      border-radius: 8px;
+    }
+    .bookshelf::before { top: 31%; }
+    .bookshelf::after { top: 63%; }
+
+    .shelf-books {
+      position: absolute;
+      inset: 0;
+      padding: 10% 10% 9%;
+      display: grid;
+      grid-template-rows: 1fr 1fr 1fr;
+      gap: 10%;
+    }
+
+    .row {
+      display: flex;
+      align-items: end;
+      gap: 4%;
+    }
+
+    .book {
+      width: 10%;
+      border-radius: 3px 3px 1px 1px;
+      background: #6f5641;
+      box-shadow: inset -2px 0 0 rgba(255,255,255,.08);
+    }
+
+    .window {
+      position: absolute;
+      right: 17%;
+      top: 15%;
+      width: 28%;
+      height: 34%;
+      background: linear-gradient(180deg, #2c3452 0%, #20283f 100%);
+      border: 10px solid var(--window-frame);
+      border-bottom-width: 12px;
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .window::before,
+    .window::after {
+      content: "";
+      position: absolute;
+      background: rgba(96, 66, 50, .95);
+    }
+
+    .window::before {
+      width: 6px;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .window::after {
+      height: 6px;
+      left: 0;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      display: none;
+    }
+
+    .stars {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 16% 22%, rgba(255,255,255,.85) 0 1px, transparent 2px),
+        radial-gradient(circle at 42% 15%, rgba(255,255,255,.65) 0 1px, transparent 2px),
+        radial-gradient(circle at 74% 29%, rgba(255,255,255,.8) 0 1px, transparent 2px),
+        radial-gradient(circle at 85% 12%, rgba(255,255,255,.6) 0 1px, transparent 2px);
+      opacity: .7;
+    }
+
+    .clouds-back {
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 43%;
+      background:
+        radial-gradient(circle at 12% 72%, rgba(215,212,214,.85) 0 14%, transparent 15%),
+        radial-gradient(circle at 28% 80%, rgba(221,216,210,.88) 0 16%, transparent 17%),
+        radial-gradient(circle at 56% 76%, rgba(214,210,209,.84) 0 18%, transparent 19%),
+        radial-gradient(circle at 78% 82%, rgba(222,217,212,.9) 0 17%, transparent 18%),
+        radial-gradient(circle at 92% 70%, rgba(217,214,211,.88) 0 14%, transparent 15%);
+      animation: drift 18s linear infinite alternate;
+      opacity: .95;
+    }
+
+    .lighthouse {
+      position: absolute;
+      right: 7%;
+      bottom: 12%;
+      width: 24%;
+      height: 70%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .tower {
+      position: absolute;
+      right: 13%;
+      bottom: 0;
+      width: 42%;
+      height: 63%;
+      background: linear-gradient(180deg, #e4ded8 0%, #cfc4ba 100%);
+      clip-path: polygon(24% 0, 76% 0, 100% 100%, 0 100%);
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,.08);
+    }
+
+    .tower::before {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 32%;
+      background: #844a34;
+      opacity: .9;
+    }
+
+    .lantern {
+      position: absolute;
+      right: 10%;
+      bottom: 56%;
+      width: 48%;
+      height: 22%;
+      background: linear-gradient(180deg, #6a4f39 0%, #3d2b20 100%);
+      border-radius: 12px 12px 6px 6px;
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,.14);
+    }
+
+    .lantern::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 20%;
+      transform: translateX(-50%);
+      width: 26%;
+      height: 32%;
+      background: #ffd78f;
+      border-radius: 50%;
+      box-shadow: 0 0 18px rgba(255, 216, 144, .9);
+    }
+
+    .beam {
+      position: absolute;
+      right: 28%;
+      bottom: 63%;
+      width: 170px;
+      height: 84px;
+      background: linear-gradient(90deg, rgba(255,221,157,.55), rgba(255,221,157,0));
+      clip-path: polygon(0 42%, 100% 0, 100% 100%);
+      transform-origin: right center;
+      animation: beam-sweep 8s ease-in-out infinite;
+      opacity: .9;
+      filter: blur(1px);
+    }
+
+    .desk {
+      position: absolute;
+      left: 30%;
+      bottom: 18%;
+      width: 47%;
+      height: 18%;
+      z-index: 5;
+    }
+
+    .desktop {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 36%;
+      background: linear-gradient(180deg, #80563f 0%, #603f31 100%);
+      border-radius: 8px 8px 4px 4px;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,.12);
+    }
+
+    .desk-body {
+      position: absolute;
+      left: 2%;
+      right: 2%;
+      top: 34%;
+      bottom: 0;
+      background: linear-gradient(180deg, #704b38 0%, #523729 100%);
+      clip-path: polygon(0 0, 100% 0, 97% 20%, 94% 100%, 78% 100%, 78% 22%, 22% 22%, 22% 100%, 6% 100%, 3% 20%);
+    }
+
+    .desk::before,
+    .desk::after {
+      content: "";
+      position: absolute;
+      width: 12%;
+      top: 32%;
+      bottom: -30%;
+      background: linear-gradient(180deg, #684633 0%, #4b3023 100%);
+    }
+
+    .desk::before { left: 6%; }
+    .desk::after { right: 6%; }
+
+    .chair {
+      position: absolute;
+      left: 58%;
+      bottom: 11%;
+      width: 13%;
+      height: 23%;
+      z-index: 4;
+    }
+
+    .chair .back {
+      position: absolute;
+      inset: 0 12% 26% 12%;
+      background: linear-gradient(180deg, #5a3a2d 0%, #3c271f 100%);
+      border-radius: 16px 16px 10px 10px;
+    }
+    .chair .seat {
+      position: absolute;
+      left: 22%;
+      right: 22%;
+      bottom: 24%;
+      height: 18%;
+      background: #402922;
+      border-radius: 50%;
+    }
+    .chair .stem {
+      position: absolute;
+      width: 5%;
+      height: 28%;
+      left: 50%;
+      bottom: 6%;
+      transform: translateX(-50%);
+      background: #342520;
+      border-radius: 999px;
+    }
+
+    .gura {
+      position: absolute;
+      left: 55.5%;
+      bottom: 24%;
+      width: 16%;
+      height: 27%;
+      z-index: 6;
+      animation: bob 4.6s ease-in-out infinite;
+      cursor: pointer;
+    }
+
+    .gura .body {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, #d7ecf1 0%, #bad5de 100%);
+      border: 3px solid rgba(75, 105, 120, .25);
+      border-bottom: none;
+      border-radius: 52% 52% 36% 36% / 42% 42% 22% 22%;
+      clip-path: path("M 50 4 C 77 4, 94 24, 95 57 C 96 92, 84 114, 74 128 C 66 139, 61 146, 50 146 C 39 146, 34 139, 26 128 C 16 114, 4 92, 5 57 C 6 24, 23 4, 50 4 Z");
+    }
+
+    /* fallback if path unsupported */
+    @supports not (clip-path: path("M 0 0")) {
+      .gura .body {
+        clip-path: none;
+        border-radius: 46% 46% 26% 26% / 36% 36% 14% 14%;
+      }
+    }
+
+    .gura .arm-left,
+    .gura .arm-right {
+      position: absolute;
+      width: 28%;
+      height: 22%;
+      bottom: 8%;
+      background: linear-gradient(180deg, #cbe3ea 0%, #afcdd7 100%);
+      border-radius: 50px;
+      z-index: 2;
+    }
+    .gura .arm-left { left: 16%; transform: rotate(6deg); }
+    .gura .arm-right { right: 16%; transform: rotate(-6deg); }
+
+    .gura .glasses {
+      position: absolute;
+      left: 17%;
+      right: 17%;
+      top: 34%;
+      height: 18%;
+      z-index: 3;
+    }
+
+    .gura .glasses::before,
+    .gura .glasses::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 38%;
+      height: 100%;
+      background: #0d1014;
+      border-radius: 35% 35% 45% 45%;
+    }
+    .gura .glasses::before { left: 0; }
+    .gura .glasses::after { right: 0; }
+
+    .gura .bridge {
+      position: absolute;
+      left: 37%;
+      right: 37%;
+      top: 40%;
+      height: 8%;
+      background: #0d1014;
+      border-radius: 999px;
+      z-index: 3;
+    }
+
+    .gura .smile {
+      position: absolute;
+      left: 41%;
+      top: 58%;
+      width: 18%;
+      height: 10%;
+      border-bottom: 5px solid #202427;
+      border-radius: 0 0 30px 30px;
+      z-index: 3;
+    }
+
+    .desk-lamp {
+      position: absolute;
+      left: 40%;
+      bottom: 29%;
+      width: 13%;
+      height: 28%;
+      z-index: 6;
+      cursor: pointer;
+    }
+
+    .desk-lamp .base {
+      position: absolute;
+      bottom: 0;
+      left: 34%;
+      width: 32%;
+      height: 10%;
+      background: linear-gradient(180deg, #c79953 0%, #8f6532 100%);
+      border-radius: 50%;
+    }
+
+    .desk-lamp .stem {
+      position: absolute;
+      bottom: 8%;
+      left: 48%;
+      width: 5%;
+      height: 48%;
+      background: linear-gradient(180deg, #cda05b 0%, #916633 100%);
+      transform: translateX(-50%);
+      border-radius: 999px;
+    }
+
+    .desk-lamp .arm {
+      position: absolute;
+      left: 43%;
+      top: 30%;
+      width: 32%;
+      height: 5%;
+      background: linear-gradient(180deg, #cda05b 0%, #916633 100%);
+      transform: rotate(-28deg);
+      transform-origin: left center;
+      border-radius: 999px;
+    }
+
+    .desk-lamp .shade {
+      position: absolute;
+      left: 62%;
+      top: 14%;
+      width: 30%;
+      height: 15%;
+      background: linear-gradient(180deg, #b78644 0%, #6a4826 100%);
+      border-radius: 44px 44px 20px 20px;
+      transform: rotate(10deg);
+    }
+
+    .desk-lamp .light {
+      position: absolute;
+      left: 46%;
+      top: 18%;
+      width: 130%;
+      height: 90%;
+      background: radial-gradient(circle at 35% 20%, rgba(255,220,150,.44), rgba(255,220,150,0) 62%);
+      pointer-events: none;
+    }
+
+    .paper {
+      position: absolute;
+      background: var(--paper);
+      box-shadow: 0 8px 10px rgba(0,0,0,.12);
+      z-index: 6;
+      cursor: pointer;
+    }
+    .paper.note-left {
+      left: 42%;
+      bottom: 24.5%;
+      width: 9%;
+      height: 4.2%;
+      transform: rotate(-6deg);
+    }
+    .paper.note-right {
+      left: 69%;
+      bottom: 24.5%;
+      width: 10%;
+      height: 4.5%;
+      transform: rotate(1deg);
+    }
+    .paper.book {
+      left: 54%;
+      bottom: 24.3%;
+      width: 12.5%;
+      height: 5.6%;
+      border-radius: 2px 10px 10px 2px;
+      background: linear-gradient(90deg, #e3d5bf 0 48%, #dbcab0 49% 51%, #e6d8c2 52%);
+    }
+
+    .mug {
+      position: absolute;
+      left: 49%;
+      bottom: 25%;
+      width: 4.5%;
+      height: 8.5%;
+      background: linear-gradient(180deg, #efe3cf 0%, #cab79a 100%);
+      border-radius: 0 0 10px 10px;
+      z-index: 6;
+      cursor: pointer;
+    }
+    .mug::before {
+      content: "";
+      position: absolute;
+      top: -8%;
+      left: 6%;
+      right: 6%;
+      height: 10%;
+      background: #f4ebdc;
+      border-radius: 50%;
+    }
+    .mug::after {
+      content: "";
+      position: absolute;
+      right: -18%;
+      top: 24%;
+      width: 22%;
+      height: 34%;
+      border: 3px solid #ddcfb8;
+      border-left: none;
+      border-radius: 0 999px 999px 0;
+    }
+
+    .steam,
+    .steam::before,
+    .steam::after {
+      position: absolute;
+      content: "";
+      width: 16px;
+      height: 54px;
+      border-radius: 50%;
+      border-left: 3px solid rgba(255,255,255,0.28);
+      border-top: 3px solid transparent;
+      border-bottom: 3px solid transparent;
+      filter: blur(.2px);
+    }
+    .steam {
+      left: 50.2%;
+      bottom: 32.5%;
+      z-index: 6;
+      animation: steam-up 3.6s ease-in-out infinite;
+    }
+    .steam::before {
+      left: -9px;
+      top: -8px;
+      transform: rotate(-12deg);
+      animation: steam-up 3.3s ease-in-out infinite .5s;
+    }
+    .steam::after {
+      left: 7px;
+      top: -14px;
+      transform: rotate(10deg);
+      animation: steam-up 3.8s ease-in-out infinite .2s;
+    }
+
+    .plant {
+      position: absolute;
+      left: 77.5%;
+      bottom: 23.8%;
+      width: 6.2%;
+      height: 10.8%;
+      z-index: 6;
+      cursor: pointer;
+    }
+    .plant .pot {
+      position: absolute;
+      inset: auto 22% 0 22%;
+      height: 34%;
+      background: linear-gradient(180deg, #b27846 0%, #8a5530 100%);
+      clip-path: polygon(10% 0, 90% 0, 78% 100%, 22% 100%);
+    }
+    .plant .leaf {
+      position: absolute;
+      width: 26%;
+      height: 36%;
+      background: linear-gradient(180deg, var(--plant) 0%, var(--plant-dark) 100%);
+      border-radius: 100% 0 100% 0;
+      transform-origin: bottom center;
+    }
+    .plant .leaf:nth-child(1) { left: 22%; top: 8%; transform: rotate(-34deg); }
+    .plant .leaf:nth-child(2) { left: 34%; top: 2%; transform: rotate(-12deg); }
+    .plant .leaf:nth-child(3) { left: 48%; top: 5%; transform: rotate(16deg); }
+    .plant .leaf:nth-child(4) { left: 56%; top: 12%; transform: rotate(34deg); }
+    .plant .leaf:nth-child(5) { left: 30%; top: 18%; transform: rotate(-54deg); }
+    .plant .leaf:nth-child(6) { left: 48%; top: 18%; transform: rotate(52deg); }
+
+    .cloud-floor {
+      position: absolute;
+      inset: auto -4% -6% -4%;
+      height: 34%;
+      z-index: 7;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 5% 60%, var(--cloud) 0 13%, transparent 14%),
+        radial-gradient(circle at 14% 74%, #e6dfd7 0 15%, transparent 16%),
+        radial-gradient(circle at 24% 65%, #d8d1ca 0 13%, transparent 14%),
+        radial-gradient(circle at 38% 82%, #e3ddd5 0 18%, transparent 19%),
+        radial-gradient(circle at 52% 70%, var(--cloud) 0 15%, transparent 16%),
+        radial-gradient(circle at 66% 80%, #e0dad2 0 16%, transparent 17%),
+        radial-gradient(circle at 82% 69%, #ddd7cf 0 15%, transparent 16%),
+        radial-gradient(circle at 96% 61%, #e5ded7 0 13%, transparent 14%);
+      animation: drift 24s ease-in-out infinite alternate;
+    }
+
+    .hotspot {
+      position: absolute;
+      z-index: 20;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .hotspot:focus-visible {
+      outline: 3px solid rgba(255, 219, 150, 0.8);
+      outline-offset: 2px;
+      border-radius: 16px;
+    }
+
+    .hs-gura   { left: 55%; top: 36%; width: 16%; height: 28%; }
+    .hs-window { right: 17%; top: 15%; width: 28%; height: 34%; }
+    .hs-shelf  { left: 4.5%; bottom: 22%; width: 19%; height: 48%; }
+    .hs-lamp   { left: 39%; bottom: 27%; width: 14%; height: 29%; }
+    .hs-mug    { left: 48.5%; bottom: 24%; width: 6%; height: 11%; }
+    .hs-plant  { left: 77%; bottom: 22.5%; width: 8%; height: 12%; }
+
+    .message {
+      margin-top: 18px;
+      background: rgba(20, 22, 31, 0.7);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #f8f0e3;
+      padding: 16px 18px;
+      border-radius: 18px;
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      font-size: 16px;
+      line-height: 1.65;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+    }
+
+    .hint {
+      margin-top: 10px;
+      color: rgba(255,255,255,.76);
+      font-size: 13px;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes drift {
+      0% { transform: translateX(-6px); }
+      100% { transform: translateX(8px); }
+    }
+
+    @keyframes beam-sweep {
+      0%, 100% { transform: rotate(-10deg); opacity: .55; }
+      50% { transform: rotate(8deg); opacity: .92; }
+    }
+
+    @keyframes steam-up {
+      0% { transform: translateY(8px) scale(.95); opacity: 0; }
+      20% { opacity: .55; }
+      70% { opacity: .2; }
+      100% { transform: translateY(-10px) scale(1.05); opacity: 0; }
+    }
+
+    @media (max-width: 700px) {
+      body { padding: 14px; }
+      .message { font-size: 15px; }
+      .subtitle, .hint { font-size: 12px; }
+      .office { border-radius: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 class="title">☁️ 雲灯台事務所</h1>
+    <p class="subtitle">GitHub Pages用の最小プロトタイプ。クリックすると幹部のひとことが出ます。</p>
+
+    <div class="office" aria-label="雲灯台事務所の部屋">
+      <div class="ceiling-lamp" aria-hidden="true">
+        <div class="cord"></div>
+        <div class="shade"></div>
+        <div class="bulb"></div>
+        <div class="glow"></div>
+      </div>
+
+      <div class="bookshelf" aria-hidden="true">
+        <div class="shelf-books">
+          <div class="row">
+            <div class="book" style="height:86%"></div>
+            <div class="book" style="height:72%"></div>
+            <div class="book" style="height:90%"></div>
+            <div class="book" style="height:78%"></div>
+            <div class="book" style="height:60%"></div>
+            <div class="book" style="height:88%"></div>
+          </div>
+          <div class="row">
+            <div class="book" style="height:92%"></div>
+            <div class="book" style="height:70%"></div>
+            <div class="book" style="height:85%"></div>
+            <div class="book" style="height:76%"></div>
+            <div class="book" style="height:65%"></div>
+            <div class="book" style="height:80%"></div>
+          </div>
+          <div class="row">
+            <div class="book" style="height:82%"></div>
+            <div class="book" style="height:74%"></div>
+            <div class="book" style="height:58%"></div>
+            <div class="book" style="height:66%"></div>
+            <div class="book" style="height:84%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="window" aria-hidden="true">
+        <div class="stars"></div>
+        <div class="clouds-back"></div>
+      </div>
+
+      <div class="lighthouse" aria-hidden="true">
+        <div class="beam"></div>
+        <div class="lantern"></div>
+        <div class="tower"></div>
+      </div>
+
+      <div class="chair" aria-hidden="true">
+        <div class="back"></div>
+        <div class="seat"></div>
+        <div class="stem"></div>
+      </div>
+
+      <div class="desk" aria-hidden="true">
+        <div class="desktop"></div>
+        <div class="desk-body"></div>
+      </div>
+
+      <div class="desk-lamp" aria-hidden="true">
+        <div class="base"></div>
+        <div class="stem"></div>
+        <div class="arm"></div>
+        <div class="shade"></div>
+        <div class="light"></div>
+      </div>
+
+      <div class="paper note-left" aria-hidden="true"></div>
+      <div class="paper book" aria-hidden="true"></div>
+      <div class="paper note-right" aria-hidden="true"></div>
+      <div class="mug" aria-hidden="true"></div>
+      <div class="steam" aria-hidden="true"></div>
+
+      <div class="plant" aria-hidden="true">
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="pot"></div>
+      </div>
+
+      <div class="gura" aria-hidden="true">
+        <div class="body"></div>
+        <div class="arm-left"></div>
+        <div class="arm-right"></div>
+        <div class="glasses"></div>
+        <div class="bridge"></div>
+        <div class="smile"></div>
+      </div>
+
+      <div class="cloud-floor" aria-hidden="true"></div>
+
+      <button class="hotspot hs-gura" data-key="gura" aria-label="幹部をクリック"></button>
+      <button class="hotspot hs-window" data-key="window" aria-label="窓をクリック"></button>
+      <button class="hotspot hs-shelf" data-key="shelf" aria-label="本棚をクリック"></button>
+      <button class="hotspot hs-lamp" data-key="lamp" aria-label="ランプをクリック"></button>
+      <button class="hotspot hs-mug" data-key="mug" aria-label="マグカップをクリック"></button>
+      <button class="hotspot hs-plant" data-key="plant" aria-label="植物をクリック"></button>
+    </div>
+
+    <div class="message" id="message">幹部の事務所へようこそ。気になるところをクリックしてみてね。</div>
+    <p class="hint">クリック候補：幹部 / 窓 / 本棚 / ランプ / マグカップ / 植物</p>
+  </div>
+
+  <script>
+    const lines = {
+      gura: [
+        '今日のぽわ指数は、かなり良好です。',
+        '静かな部屋ほど、いいアイデアが降りやすいですね。',
+        '幹部はだいたいここで待機しています。',
+      ],
+      window: [
+        '窓の外では、灯台がゆっくり見回り中です。',
+        '雲の流れはおだやか。観測条件は良好です。',
+        '帰ってくる場所って、こういう明かりかもしれませんね。',
+      ],
+      shelf: [
+        'ぽわ研究資料と、静かな販促室ログが並んでいます。',
+        '本棚には、まだ見ぬ企画の種も混ざっています。',
+        'ここはたぶん、幹部の思考の予備バッファです。',
+      ],
+      lamp: [
+        '真鍮ランプ、かなり良い仕事をしています。',
+        '夜の灯りがあるだけで、部屋の安心感が変わりますね。',
+        '作業灯というより、帰還ビーコン寄りです。',
+      ],
+      mug: [
+        'ぽわ休憩は、進行管理のうちです。',
+        '湯気のあるマグ、だいたい正義です。',
+        '温かい飲み物があると、思考の角が少し丸くなります。',
+      ],
+      plant: [
+        '植物はまだ小さめ。今後のアップデートで育つかもしれません。',
+        '異質なものがひとつあると、部屋はよく落ち着きます。',
+        'この小さな緑、見た目以上に重要ポジションです。',
+      ],
+    };
+
+    const message = document.getElementById('message');
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    document.querySelectorAll('.hotspot').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        message.textContent = pick(lines[key]);
+      });
+    });
+  </script>
+</body>
+</html>
