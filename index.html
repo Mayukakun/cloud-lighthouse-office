@@ -88,43 +88,61 @@
     }
 
     .desk {
+      position: absolute;
       left: 330px;
-      top: 260px;
+      top: 280px;
       width: 300px;
-      height: 95px;
+      height: 70px;
       border-radius: 24px 24px 12px 12px;
       background: #d1bf64;
       box-shadow: 0 10px 0 #b89f4d;
+      z-index: 1;
     }
 
     .gura {
+      position: absolute;
       left: 405px;
       top: 145px;
-      width: 150px;
-      height: 135px;
-      border-radius: 48% 48% 42% 42%;
-      background: #82abb0;
+      width: 170px;
+      height: 170px;
+      border-radius: 0;
+      background: transparent;
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 3.4rem;
+      z-index: 2;
     }
 
-    .gura::after {
+    .gura img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .gura:not(.gura--image) {
+      border-radius: 48% 48% 42% 42%;
+      background: #82abb0;
+    }
+
+    .gura:not(.gura--image)::after {
       content: "🕶️";
     }
 
     .lamp {
-      left: 620px;
-      top: 205px;
-      font-size: 3rem;
+      left: 560px;
+      top: 275px;
+      font-size: 2.6rem;
+      z-index: 3;
     }
 
     .mug {
-      left: 360px;
-      top: 225px;
+      left: 380px;
+      top: 270px;
       font-size: 2.6rem;
+      z-index: 3;
     }
 
     .plant {
@@ -136,17 +154,20 @@
     .kohuang {
       left: 95px;
       bottom: 40px;
-      width: 190px;
-      height: 95px;
-      border-radius: 28px;
-      background: rgba(255, 250, 210, .95);
+      width: 210px;
+      height: 92px;
+      border-radius: 24px 24px 18px 18px;
+      background: linear-gradient(#fff8c9, #fff4a8);
       border: 4px solid #fff;
-      box-shadow: 0 8px 18px rgba(120,100,60,.14);
+      box-shadow:
+        0 8px 18px rgba(120,100,60,.14),
+        inset 0 -10px 0 rgba(209,191,100,.28);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       font-size: 2.5rem;
+      z-index: 4;
     }
 
     .kohuang::before {
@@ -155,9 +176,12 @@
 
     .kohuang::after {
       content: "受付";
-      font-size: 1rem;
+      font-size: 1.05rem;
       color: #8f7c35;
       font-weight: bold;
+      background: rgba(255,255,255,.55);
+      padding: 4px 10px;
+      border-radius: 999px;
     }
 
     .message-box {
@@ -238,8 +262,10 @@
     <section class="room">
       <div class="clickable window" data-message="窓の外には、今日のぽわ雲がゆっくり流れています。"></div>
       <div class="clickable bookshelf" data-message="本棚には、灯台活動とぽわ研究の記録がぎっしり並んでいます。"></div>
-      <div class="clickable gura" data-message="幹部：おつぽわ。今日も構造を見ながら、ゆっくり進めよう。"></div>
-      <div class="clickable lamp" data-message="ランプが、作業机の上をやさしく照らしています。">🛋️</div>
+      <div class="clickable gura gura--image" data-message="幹部：おつぽわ。今日も構造を見ながら、ゆっくり進めよう。">
+        <img src="images/gura.png" alt="ぽわ雲事務所の幹部">
+      </div>     
+      <div class="clickable lamp" data-message="ランプが、作業机の上をやさしく照らしています。">🪔</div>
       <div class="clickable mug" data-message="マグカップには、ぽわ補給用のお茶が入っています。">☕️</div>
       <div class="clickable plant" data-message="植物は、事務所の空気を静かに整えています。">🪴</div>
       <div class="clickable kohuang" data-message="小黄受付：ぽわ雲事務所へようこそ。今日はどんな用件ぽわ？"></div>
