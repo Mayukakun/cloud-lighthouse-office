@@ -19,13 +19,18 @@
       min-height: 640px;
       margin: 30px auto;
       border-radius: 32px;
-      background:
-        radial-gradient(circle at 20% 15%, rgba(255,255,255,.9), transparent 18%),
-        radial-gradient(circle at 80% 20%, rgba(255,255,255,.8), transparent 20%),
-        linear-gradient(#faf9f5, #eef7f4);
-      box-shadow: 0 12px 30px rgba(92, 120, 130, .18);
       overflow: hidden;
       border: 4px solid rgba(255,255,255,.8);
+      box-shadow: 0 12px 30px rgba(92, 120, 130, .18);
+
+      background:
+        radial-gradient(circle at 50% 20%, rgba(255,255,255,.88), transparent 34%),
+        linear-gradient(90deg, rgba(209,191,100,0.10) 1px, transparent 1px),
+        linear-gradient(#f8fbfb, #eef7f4);
+      background-size:
+        auto,
+        28px 28px,
+        auto;
     }
 
     h1 {
@@ -69,23 +74,28 @@
     pointer-events: none;
   }
 
-    .bookshelf {
-      right: 70px;
-      top: 95px;
-      width: 150px;
-      height: 190px;
-      border-radius: 18px;
-      background: #d7b98b;
-      box-shadow: inset 0 -8px 0 rgba(120,80,40,.15);
-      }
-
-    .bookshelf::before {
-      content: "📚";
-      font-size: 3.4rem;
+      .bookshelf {
       position: absolute;
-      left: 45px;
-      top: 55px;
-      }
+      right: 0px;
+      top: 0px;
+      width: 185px;
+      height: 300px;
+      z-index: 1;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    .bookshelf img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .bookshelf--image::before {
+      content: none;
+    }
 
       .window--image::after {
       content: none;
@@ -197,7 +207,7 @@
       border-left: 4px solid rgba(255,255,255,0.72);
       border-top: 3px solid transparent;
       border-bottom: 3px solid transparent;
-      filter: blur(.3px) drop-shadow(0 0 3px rgba(130, 171, 176, 1.45));
+      filter: blur(.3px) drop-shadow(0 0 3px rgba(130, 171, 176, 1));
       pointer-events: none;
     }
 
@@ -329,12 +339,12 @@
       }
 
       .mug {
-        left: 30%;
-        top: 305px;
+        left: 33%;
+        top: 345px;
       }
 
       .lamp {
-        right: 26%;
+        right: 30%;
         left: auto;
         top: 285px;
       }
@@ -348,7 +358,53 @@
         left: 30px;
         bottom: 45px;
       }
+  
+      .clickable:hover {
+        transform: translateY(-2px);
+        filter: drop-shadow(0 3px 5px rgba(0,0,0,.08));
+      }
+
+      .window:hover,
+      .bookshelf:hover {
+        transform: scale(.85) translateY(-2px);
+      }
     }
+
+    @media (max-width: 400px) {
+      .gura {
+        width:190px;
+        left: 20%;
+        top: 220px;
+        /* transform: translateX(-50%); */
+      }
+
+      .window {
+        width:170px;
+        left: 0px;
+        top: 120px;
+        transform: scale(.85);
+      }
+
+      .bookshelf {
+        width:150px;
+        right: 0px;
+        top: 90px;
+        transform: scale(.85);
+      }
+
+      .mug {
+        left: 20%;
+        top: 345px;
+      }
+
+      .lamp {
+        right: 20%;
+        left: auto;
+        top: 285px;
+      }
+    }
+
+
   </style>
 </head>
 <body>
@@ -361,7 +417,9 @@
       <div class="clickable window window--image" data-message="窓の外には、今日のぽわ雲がゆっくり流れています。">
         <img src="images/powa-window.png" alt="ぽわ雲事務所の窓">
       </div>
-      <div class="clickable bookshelf" data-message="本棚には、灯台活動とぽわ研究の記録がぎっしり並んでいます。"></div>
+      <div class="clickable bookshelf bookshelf--image" data-message="本棚には、灯台活動とぽわ研究の記録がぎっしり並んでいます。">
+        <img src="images/powa-bookshelf.png" alt="ぽわ雲事務所のアンティーク本棚">
+      </div>      
       <div class="clickable gura gura--image" data-message="幹部：おつぽわ。今日も構造を見ながら、ゆっくり進めよう。">
         <img src="images/gura-chair.png" alt="ぽわ雲事務所の幹部">
       </div>     
